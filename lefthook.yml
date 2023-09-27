@@ -1,0 +1,26 @@
+# EXAMPLE USAGE:
+#
+#   Refer for explanation to following link:
+#   https://github.com/evilmartians/lefthook/blob/master/docs/configuration.md
+#
+# pre-push:
+#   commands:
+#     packages-audit:
+#       tags: frontend security
+#       run: yarn audit
+#     gems-audit:
+#       tags: backend security
+#       run: bundle audit
+#
+commit-msg:
+  scripts:
+    commit-msg:
+      "sailr.sh":
+      runner: sh
+pre-commit:
+  parallel: true
+  scripts:
+    "validate.sh":
+      runner: bash
+      glob: "*.yaml"
+
