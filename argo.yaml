@@ -1,0 +1,176 @@
+
+apiVersion: argoproj.io/v1alpha1
+kind: ArgoCD
+metadata:
+  name: gitops
+  namespace: lhind-gitops
+  labels:
+    app-name: gitops
+spec:
+  server:
+    autoscale:
+      enabled: false
+    grpc:
+      ingress:
+        enabled: true
+        ingressClassName: azure-application-gateway
+        tls:
+          - hosts:
+              - gitops-grpc.dev.myidtravel.com
+            secretName: argocd-secret
+        annotations:
+          appgw.ingress.kubernetes.io/ssl-redirect: "true"
+          appgw.ingress.kubernetes.io/backend-protocol: "grpc"
+          appgw.ingress.kubernetes.io/backend-hostname: "gitops-grpc.dev.myidtravel.com"
+          appgw.ingress.kubernetes.io/appgw-ssl-certificate: "myid-wafv2-dev-cert"
+    ingress:
+      enabled: true
+      ingressClassName: azure-application-gateway
+      tls:
+        - hosts:
+            - gitops.dev.myidtravel.com
+          secretName: argocd-secret
+      annotations:
+        appgw.ingress.kubernetes.io/ssl-redirect: "true"
+        appgw.ingress.kubernetes.io/backend-protocol: "http"
+        appgw.ingress.kubernetes.io/backend-hostname: "gitops.dev.myidtravel.com"
+        appgw.ingress.kubernetes.io/appgw-ssl-certificate: "myid-wafv2-dev-cert"
+    host: gitops.dev.myidtravel.com
+    insecure: true
+    resources:
+      limits:
+        cpu: 400m
+        memory: 1536Mi
+      requests:
+        cpu: 250m
+        memory: 1Gi
+    route:
+      enabled: false
+    service:
+      type: ''
+  grafana:
+    enabled: false
+    ingress:
+      enabled: false
+    resources:
+      limits:
+        cpu: 500m
+        memory: 256Mi
+      requests:
+        cpu: 250m
+        memory: 128Mi
+    route:
+      enabled: false
+  helpChatText: Help Chat
+  notifications:
+    enabled: false
+  prometheus:
+    enabled: false
+    ingress:
+      enabled: false
+    route:
+      enabled: false
+  initialSSHKnownHosts: {}
+  applicationInstanceLabelKey: gitops
+  applicationSet:
+    resources:
+      limits:
+        cpu: '2'
+        memory: 1Gi
+      requests:
+        cpu: 250m
+        memory: 512Mi
+    webhookServer:
+      ingress:
+        enabled: false
+      route:
+        enabled: false
+  oidcConfig: |
+    name: Azure
+    issuer: https://login.microsoftonline.com/d9f5cb22-01c9-4956-b859-4f876f6a5c83/v2.0
+    clientID: 156ef3e6-f8b9-4112-9225-230d85bc0184
+    clientSecret: $oidc.azure.clientSecret
+    requestedIDTokenClaims:
+      groups:
+        essential: true
+    requestedScopes:
+      - openid
+      - profile
+      - email
+  rbac:
+    defaultPolicy: 'role:basic-user'
+    policy: |
+      p, role:org-admin, applications, *, */*, allow
+      p, role:org-admin, clusters, *, *, allow
+      p, role:org-admin, repositories, get, *, allow
+      p, role:org-admin, repositories, create, *, allow
+      p, role:org-admin, repositories, update, *, allow
+      p, role:org-admin, repositories, delete, *, allow
+      p, role:devs, applications, get, *, allow
+      p, role:devs, applications, create, *, allow
+      p, role:devs, applications, update, *, allow
+      p, role:devs, repositories, get, *, allow
+      p, role:devs, repositories, create, *, allow
+      p, role:basic-user, clusters, get, *, allow
+      p, role:basic-user, repositories, get, *, allow
+      p, role:reader, clusters, get, *, allow
+      p, role:reader, repositories, get, *, allow
+      p, role:reader, applications, get, *, allow
+      g, d96bee2e-1a85-49c5-9a5c-2191aeca72bf, role:admin
+    scopes: '[groups, email]'
+  repo:
+    resources:
+      limits:
+        cpu: '2'
+        memory: 3Gi
+      requests:
+        cpu: '1'
+        memory: 2Gi
+  resourceExclusions: |
+    - apiGroups:
+      - tekton.dev
+      clusters:
+      - '*'
+      kinds:
+      - TaskRun
+      - PipelineRun
+  helpChatURL: >-
+    https://teams.microsoft.com/l/channel/19%3a74c76ade0c8f400da46b401d6dcad6fa%40thread.skype/%25F0%259F%2592%25AC%2520Support%252C%2520Feedback%252C%2520Q%2520and%2520A?groupId=eee72d1b-0f99-4900-8039-ef017f5e105f&tenantId=72e15514-5be9-46a8-8b0b-af9b1b77b3b8
+  ha:
+    enabled: false
+    resources:
+      limits:
+        cpu: 100m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+  tls: {}
+  redis:
+    resources:
+      limits:
+        cpu: 400m
+        memory: 1Gi
+      requests:
+        cpu: 250m
+        memory: 512Mi
+  controller:
+    env:
+      - name: HOME
+        value: /home/argocd
+      - name: ARGOCD_K8S_CLIENT_BURST
+        value: '300'
+    parallelismLimit: 25
+    processors:
+      operation: 40
+      status: 40
+    resources:
+      limits:
+        cpu: 500m
+        memory: 4Gi
+      requests:
+        cpu: 250m
+        memory: 3Gi
+    sharding: {}
+  extraConfig:
+    exec.enabled: "true"
