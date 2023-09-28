@@ -12,8 +12,6 @@
 #       tags: backend security
 #       run: bundle audit
 #
-commit-msg:
-  - shell: ./lefthook/commit-msg/check-commits.sh $1
 pre-commit:
   scripts:
     "validate.sh":
