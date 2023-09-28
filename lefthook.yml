@@ -13,12 +13,8 @@
 #       run: bundle audit
 #
 commit-msg:
-  conventional-commits-check:
-    scripts:
-      "cc.sh":
-      runner: sh
+  - shell: ./lefthook/commit-msg/check-commits.sh $1
 pre-commit:
-  parallel: true
   scripts:
     "validate.sh":
       runner: bash
