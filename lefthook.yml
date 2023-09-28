@@ -15,7 +15,7 @@
 commit-msg:
   scripts:
     commit-msg:
-      "sailr.sh":
+      "cc.sh":
       runner: sh
 pre-commit:
   parallel: true
